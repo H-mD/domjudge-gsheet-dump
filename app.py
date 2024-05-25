@@ -4,16 +4,24 @@ import requests
 import pandas as pd
 from dotenv import load_dotenv
 import os
+import sys
+
+def convert_to_excel_column(n):
+    result = ""
+    while n > 0:
+        n, remainder = divmod(n - 1, 26)
+        result = chr(65 + remainder) + result
+    return result
 
 load_dotenv()
-url = os.environ.get("URL")
+url = os.environ.get("SHEET_URL")
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 creds = ServiceAccountCredentials.from_json_keyfile_name(os.environ.get("CREDENTIALS_FILE"), scope)
 client = gspread.authorize(creds)
 
 classes = ["A", "B", "C", "D", "E", "F", "IUP"]
-modul = 1
-type = "praktikum"
+modul = int(sys.argv[2])
+type = sys.argv[1]
 header = 2
 side = 3
 
@@ -77,5 +85,5 @@ for kelas in classes:
         row += 1
 
 if row > 0:
-    range = f"{chr(side + (1 + ((modul-1)*11)) + n + 96)}{header+1}:{chr(side + (1 + ((modul-1)*11)) + n + (r-1) + 96)}{header + row}"
+    range = f"{convert_to_excel_column(side + (1 + ((modul-1)*11)) + n)}{header+1}:{convert_to_excel_column(side + (1 + ((modul-1)*11)) + n + (r-1))}{header + row}"
     worksheet.update(value, range)
